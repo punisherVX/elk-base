@@ -1,0 +1,75 @@
+---
+version: '2.1'
+services:
+  # The environment variable "TAG" is used throughout this file to
+  # specify the version of the images to run. The default is set in the
+  # '.env' file in this folder. It can be overridden with any normal
+  # technique for setting environment variables, for example:
+  #
+  #   TAG=6.0.0-beta1 docker-compose up
+  #
+  # REF: https://docs.docker.com/compose/compose-file/#variable-substitution
+  #
+  # Also be sure to set the ELASTIC_VERSION variable. For released versions,
+  # ${TAG} and ${ELASTIC_VERSION} will be identical, but for pre-release
+  # versions, ${TAG} might contain an extra build identifier, like
+  # "6.0.0-beta1-3eab5b40", so a full invocation might look like:
+  #
+  #   ELASTIC_VERSION=6.0.0-beta1 TAG=6.0.0-beta1-3eab5b40 docker-compose up
+  #
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-6.4}
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - http.host=0.0.0.0
+      - node.name=es01
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - xpack.security.enabled=false
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - ALL
+    privileged: true
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - es_backups:/usr/share/elasticsearch/backups
+      # If you prefer to use the config file, create the file below with the right info in it
+      #- ./elasticsearch/config/elasticsearch.yml:/etc/elasticsearch/elasticsearch.yml
+    ports:
+      - 9200:9200
+    networks: ['elk-stack']
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${TAG:-6.4}
+    container_name: kibana
+    restart: always
+    ports: ['5601:5601']
+    networks: ['elk-stack']
+    depends_on: ['elasticsearch']
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${TAG:-6.4}
+    container_name: logstash
+    restart: always
+    # Provide a simple pipeline configuration for Logstash with a bind-mounted file.
+    # Examples below
+    volumes:
+      - ./logstash/conf.d:/usr/share/logstash/pipeline
+    ports:
+      - 5514:5514
+    networks: ['elk-stack']
+    depends_on: ['elasticsearch']
+
+
+volumes:
+  es_data:
+    driver: local
+  es_backups:
+    driver: local
+
+networks: {elk-stack: {}}
