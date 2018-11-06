@@ -1,0 +1,2 @@
+logstash/conf.d/*
+!logstash/conf.d/default.conf
