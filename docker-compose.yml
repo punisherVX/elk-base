@@ -18,14 +18,14 @@ services:
   #   ELASTIC_VERSION=6.0.0-beta1 TAG=6.0.0-beta1-3eab5b40 docker-compose up
   #
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-6.4.2}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${TAG:-6.5.1}
     container_name: elasticsearch
     restart: always
     environment:
       - http.host=0.0.0.0
       - node.name=es01
       - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g
       - xpack.security.enabled=false
     ulimits:
       nproc: 65535
@@ -45,7 +45,7 @@ services:
     networks: ['elk-stack']
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:${TAG:-6.4.2}
+    image: docker.elastic.co/kibana/kibana:${TAG:-6.5.1}
     container_name: kibana
     restart: always
     ports: ['5601:5601']
@@ -53,7 +53,7 @@ services:
     depends_on: ['elasticsearch']
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:${TAG:-6.4.2}
+    image: docker.elastic.co/logstash/logstash:${TAG:-6.5.1}
     container_name: logstash
     restart: always
     # Provide a simple pipeline configuration for Logstash with a bind-mounted file.
@@ -62,6 +62,8 @@ services:
       - ./logstash/conf.d:/usr/share/logstash/pipeline
     ports:
       - 5514:5514
+      - 5510:5510
+      - 5516:5516
     networks: ['elk-stack']
     depends_on: ['elasticsearch']
 
