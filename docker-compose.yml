@@ -22,7 +22,7 @@ services:
     container_name: elasticsearch
     restart: always
     environment:
-      - http.host=0.0.0.0
+      - http.host=127.0.0.1
       - node.name=es01
       - ES_JAVA_OPTS=-Xms4g -Xmx4g
       - xpack.security.enabled=false
