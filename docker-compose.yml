@@ -24,7 +24,6 @@ services:
     environment:
       - http.host=0.0.0.0
       - node.name=es01
-      - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms4g -Xmx4g
       - xpack.security.enabled=false
     ulimits:
